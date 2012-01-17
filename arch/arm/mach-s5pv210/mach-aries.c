@@ -406,7 +406,7 @@ static struct s5p_media_device aries_media_devs[] = {
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM,
 		.paddr = 0,
-	},	
+	},
 #endif
 };
 
@@ -950,7 +950,7 @@ static struct max8998_adc_table_data temper_table[] =  {
 	{ 1619,  -40 },
 	{ 1632,  -50 },
 	{ 1658,  -60 },
-	{ 1667,  -70 }, 
+	{ 1667,  -70 },
 #endif
 };
 struct max8998_charger_callbacks *charger_callbacks;
@@ -1668,7 +1668,7 @@ static int ce147_ldo_en(bool en)
 		goto off;
 	}
 	udelay(50);
-	
+
 	/* Turn CAM_SENSOR_A_2.8V(VDDA) on */
 	gpio_set_value(GPIO_GPB7, 1);
 	mdelay(1);
@@ -1727,7 +1727,7 @@ off:
 }
 
 static int ce147_power_on(void)
-{	
+{
 	int err;
 	bool TRUE = true;
 
@@ -1735,7 +1735,7 @@ static int ce147_power_on(void)
 			pr_err("Failed to initialize camera regulators\n");
 			return -EINVAL;
 	}
-	
+
 	ce147_init();
 
 	/* CAM_VGA_nSTBY - GPB(0)  */
@@ -1755,12 +1755,12 @@ static int ce147_power_on(void)
 
 		return err;
 	}
-	
+
 	ce147_ldo_en(TRUE);
 
 	mdelay(1);
 
-	// CAM_VGA_nSTBY  HIGH		
+	// CAM_VGA_nSTBY  HIGH
 	gpio_direction_output(GPIO_CAM_VGA_nSTBY, 0);
 
 	gpio_set_value(GPIO_CAM_VGA_nSTBY, 1);
@@ -1772,14 +1772,14 @@ static int ce147_power_on(void)
 
 	mdelay(1);
 
-	// CAM_VGA_nRST  HIGH		
+	// CAM_VGA_nRST  HIGH
 	gpio_direction_output(GPIO_CAM_VGA_nRST, 0);
 
-	gpio_set_value(GPIO_CAM_VGA_nRST, 1);	
+	gpio_set_value(GPIO_CAM_VGA_nRST, 1);
 
 	mdelay(1);
 
-	// CAM_VGA_nSTBY  LOW	
+	// CAM_VGA_nSTBY  LOW
 	gpio_direction_output(GPIO_CAM_VGA_nSTBY, 1);
 
 	gpio_set_value(GPIO_CAM_VGA_nSTBY, 0);
@@ -1817,10 +1817,10 @@ static int ce147_power_off(void)
 
 	/* CAM_IO_EN - GPB(7) */
 	err = gpio_request(GPIO_GPB7, "GPB7");
-	
+
 	if(err) {
 		printk(KERN_ERR "failed to request GPB7 for camera control\n");
-	
+
 		return err;
 	}
 
@@ -1829,16 +1829,16 @@ static int ce147_power_off(void)
 
 	if(err) {
 		printk(KERN_ERR "failed to request GPJ0 for camera control\n");
-	
+
 		return err;
 	}
 
 	/* CAM_MEGA_nRST - GPJ1(5) */
 	err = gpio_request(GPIO_CAM_MEGA_nRST, "GPJ1");
-	
+
 	if(err) {
 		printk(KERN_ERR "failed to request GPJ1 for camera control\n");
-	
+
 		return err;
 	}
 
@@ -1859,35 +1859,35 @@ static int ce147_power_off(void)
 		return err;
 	}
 
-	// CAM_VGA_nSTBY  LOW	
+	// CAM_VGA_nSTBY  LOW
 	gpio_direction_output(GPIO_CAM_VGA_nSTBY, 1);
 
 	gpio_set_value(GPIO_CAM_VGA_nSTBY, 0);
 
 	mdelay(1);
 
-	// CAM_VGA_nRST  LOW		
+	// CAM_VGA_nRST  LOW
 	gpio_direction_output(GPIO_CAM_VGA_nRST, 1);
-	
+
 	gpio_set_value(GPIO_CAM_VGA_nRST, 0);
 
 	mdelay(1);
 
 	// CAM_MEGA_nRST - GPJ1(5) LOW
 	gpio_direction_output(GPIO_CAM_MEGA_nRST, 1);
-	
+
 	gpio_set_value(GPIO_CAM_MEGA_nRST, 0);
-	
+
 	mdelay(1);
 
 	// Mclk disable
 	s3c_gpio_cfgpin(GPIO_CAM_MCLK, 0);
-	
+
 	mdelay(1);
 
 	// CAM_MEGA_EN - GPJ0(6) LOW
 	gpio_direction_output(GPIO_CAM_MEGA_EN, 1);
-	
+
 	gpio_set_value(GPIO_CAM_MEGA_EN, 0);
 
 	mdelay(1);
@@ -1895,7 +1895,7 @@ static int ce147_power_off(void)
 	ce147_ldo_en(FALSE);
 
 	mdelay(1);
-	
+
 	gpio_free(GPIO_CAM_MEGA_EN);
 	gpio_free(GPIO_CAM_MEGA_nRST);
 	gpio_free(GPIO_CAM_VGA_nRST);
@@ -1954,7 +1954,7 @@ static int smdkc110_cam1_power(int onoff)
 	}
 
 	gpio_direction_output(S5PV210_GPB(0), 0);
-	
+
 	mdelay(1);
 
 	gpio_direction_output(S5PV210_GPB(0), 1);
@@ -1966,7 +1966,7 @@ static int smdkc110_cam1_power(int onoff)
 	mdelay(1);
 
 	gpio_free(S5PV210_GPB(0));
-	
+
 	mdelay(1);
 
 	/* CAM_VGA_nRST - GPB(2) */
@@ -2035,7 +2035,7 @@ static struct s3c_platform_camera ce147 = {
 		.height	= 480,
 	},
 
-	// Polarity 
+	// Polarity
 	.inv_pclk	= 0,
 	.inv_vsync	= 1,
 	.inv_href	= 0,
@@ -2969,7 +2969,7 @@ static struct gpio_init_data aries_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_NONE,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 	}, {
-		.num	= S5PV210_GPB(5), // GPIO_WLAN_BT_EN	
+		.num	= S5PV210_GPB(5), // GPIO_WLAN_BT_EN
 		.cfg	= S3C_GPIO_OUTPUT,
 		.val	= S3C_GPIO_SETPIN_ZERO,
 		.pud	= S3C_GPIO_PULL_NONE,
@@ -3109,7 +3109,7 @@ static struct gpio_init_data aries_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_NONE,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 	}, {
-		.num	= S5PV210_GPD1(3), // GPIO_FM_SCL_28V	
+		.num	= S5PV210_GPD1(3), // GPIO_FM_SCL_28V
 		.cfg	= S3C_GPIO_INPUT,
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_NONE,
@@ -3126,8 +3126,8 @@ static struct gpio_init_data aries_init_gpios[] = {
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_NONE,
 		.drv	= S3C_GPIO_DRVSTR_1X,
-	}, 
-	
+	},
+
 	// GPE0 ----------------------------
 	{
 		.num	= S5PV210_GPE0(0), // GPIO_CAM_PCLK
@@ -3298,13 +3298,13 @@ static struct gpio_init_data aries_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 	}, {
-		.num	= S5PV210_GPG1(4), // GPIO_WLAN_SDIO_D1 
+		.num	= S5PV210_GPG1(4), // GPIO_WLAN_SDIO_D1
 		.cfg	= S3C_GPIO_INPUT,
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 	}, {
-		.num	= S5PV210_GPG1(5), // GPIO_WLAN_SDIO_D2 
+		.num	= S5PV210_GPG1(5), // GPIO_WLAN_SDIO_D2
 		.cfg	= S3C_GPIO_INPUT,
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_DOWN,
@@ -3669,13 +3669,13 @@ static struct gpio_init_data aries_init_gpios[] = {
 #endif
 	}, {
 #if defined(CONFIG_SAMSUNG_FASCINATE)
-		.num	= S5PV210_GPH3(7), // GPIO_CP_RST	
+		.num	= S5PV210_GPH3(7), // GPIO_CP_RST
 		.cfg	= S3C_GPIO_INPUT,
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 #else
-		.num	= S5PV210_GPH3(7), // GPIO_CP_RST	
+		.num	= S5PV210_GPH3(7), // GPIO_CP_RST
 		.cfg	= S3C_GPIO_OUTPUT,
 		.val	= S3C_GPIO_SETPIN_ZERO,
 		.pud	= S3C_GPIO_PULL_NONE,
@@ -3730,7 +3730,7 @@ static struct gpio_init_data aries_init_gpios[] = {
 
 	// GPJ0 ----------------------------
 	{
-		.num	= S5PV210_GPJ0(0), // GPIO_MSENSE_SCL_28V	
+		.num	= S5PV210_GPJ0(0), // GPIO_MSENSE_SCL_28V
 		.cfg	= S3C_GPIO_INPUT,
 		.val	= S3C_GPIO_SETPIN_NONE,
 		.pud	= S3C_GPIO_PULL_NONE,
@@ -3890,7 +3890,7 @@ static struct gpio_init_data aries_init_gpios[] = {
 		.pud	= S3C_GPIO_PULL_DOWN,
 		.drv	= S3C_GPIO_DRVSTR_1X,
 #else
-		.num	= S5PV210_GPJ2(5), // GPIO_FM_RST	
+		.num	= S5PV210_GPJ2(5), // GPIO_FM_RST
 		.cfg	= S3C_GPIO_OUTPUT,
 		.val	= S3C_GPIO_SETPIN_ZERO,
 		.pud	= S3C_GPIO_PULL_NONE,
@@ -4226,9 +4226,9 @@ static unsigned int aries_sleep_gpio_table[][3] = {
   	{ S5PV210_GPA0(7), S3C_GPIO_SLP_OUT1,   S3C_GPIO_PULL_NONE},
 #elif defined (CONFIG_SAMSUNG_VIBRANT)
     { S5PV210_GPA0(4), S3C_GPIO_SLP_PREV,   S3C_GPIO_PULL_UP},
-  	{ S5PV210_GPA0(5), S3C_GPIO_SLP_PREV,   S3C_GPIO_PULL_UP}, 
-  	{ S5PV210_GPA0(6), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN}, 
-  	{ S5PV210_GPA0(7), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN}, 
+  	{ S5PV210_GPA0(5), S3C_GPIO_SLP_PREV,   S3C_GPIO_PULL_UP},
+  	{ S5PV210_GPA0(6), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},
+  	{ S5PV210_GPA0(7), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},
 #else
   	{ S5PV210_GPA0(4), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},
   	{ S5PV210_GPA0(5), S3C_GPIO_SLP_OUT0,   S3C_GPIO_PULL_NONE},
@@ -4445,7 +4445,7 @@ static unsigned int aries_sleep_gpio_table[][3] = {
 	// GPI ----------------------------------------------------
 	{ S5PV210_GPI(0),  S3C_GPIO_SLP_PREV,   S3C_GPIO_PULL_NONE},	//GPIO_CODEC_I2S_CLK
 #if defined (CONFIG_SAMSUNG_CAPTIVATE) || defined (CONFIG_SAMSUNG_VIBRANT)
-  	{ S5PV210_GPI(1),  S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_NONE},	//GPIO_GPI1 
+  	{ S5PV210_GPI(1),  S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_NONE},	//GPIO_GPI1
 #else
   	{ S5PV210_GPI(1),  S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},	//GPIO_GPI1
 #endif
@@ -4588,7 +4588,7 @@ static unsigned int aries_sleep_gpio_table[][3] = {
 #if defined (CONFIG_SAMSUNG_CAPTIVATE)
   	{ S5PV210_MP04(4), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_NONE},	//GPIO_MP044
   	{ S5PV210_MP04(5), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_NONE},	//GPIO_MP045
-#else 
+#else
   	{ S5PV210_MP04(4), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},	//GPIO_MP044
   	{ S5PV210_MP04(5), S3C_GPIO_SLP_INPUT,  S3C_GPIO_PULL_DOWN},	//GPIO_MP045
 #endif
@@ -5126,6 +5126,12 @@ static struct platform_device *aries_devices[] __initdata = {
 #if defined (CONFIG_SAMSUNG_CAPTIVATE)
 	&s3c_device_i2c13,
 #endif
+#if defined CONFIG_USB_S3C_OTG_HOST
+	&s3c_device_usb_otghcd,
+#endif
+#if defined CONFIG_USB_DWC_OTG
+	&s3c_device_usb_dwcotg,
+#endif
 #ifdef CONFIG_USB_GADGET
 	&s3c_device_usbgadget,
 #endif
@@ -5487,7 +5493,7 @@ static void __init aries_machine_init(void)
 	/* optical sensor */
 	gp2a_gpio_init();
 	i2c_register_board_info(11, i2c_devs11, ARRAY_SIZE(i2c_devs11));
-	
+
 	/* yamaha magnetic sensor */
 	i2c_register_board_info(12, i2c_devs12, ARRAY_SIZE(i2c_devs12));
 
@@ -5498,7 +5504,7 @@ static void __init aries_machine_init(void)
 	/* panel */
 	spi_register_board_info(spi_board_info, ARRAY_SIZE(spi_board_info));
 	s3cfb_set_platdata(&tl2796_data);
-	
+
 #if defined(CONFIG_S5P_ADC)
 	s3c_adc_set_platdata(&s3c_adc_platform);
 #endif
@@ -5635,6 +5641,48 @@ void usb_host_phy_off(void)
 			S5P_USB_PHY_CONTROL);
 }
 EXPORT_SYMBOL(usb_host_phy_off);
+
+#if defined CONFIG_USB_S3C_OTG_HOST || defined CONFIG_USB_DWC_OTG
+
+/* Initializes OTG Phy */
+void otg_host_phy_init(void)
+{
+	__raw_writel(__raw_readl(S5P_USB_PHY_CONTROL)
+		|(0x1<<0), S5P_USB_PHY_CONTROL); /*USB PHY0 Enable */
+// from galaxy tab otg host:
+	__raw_writel((__raw_readl(S3C_USBOTG_PHYPWR)
+		&~(0x3<<3)&~(0x1<<0))|(0x1<<5), S3C_USBOTG_PHYPWR);
+// from galaxy s2 otg host:
+//	__raw_writel((__raw_readl(S3C_USBOTG_PHYPWR)
+//        	&~(0x7<<3)&~(0x1<<0)), S3C_USBOTG_PHYPWR);
+
+	__raw_writel((__raw_readl(S3C_USBOTG_PHYCLK)
+		&~(0x1<<4))|(0x7<<0), S3C_USBOTG_PHYCLK);
+
+	__raw_writel((__raw_readl(S3C_USBOTG_RSTCON)
+		&~(0x3<<1))|(0x1<<0), S3C_USBOTG_RSTCON);
+	msleep(1);
+	__raw_writel((__raw_readl(S3C_USBOTG_RSTCON)
+		&~(0x7<<0)), S3C_USBOTG_RSTCON);
+	msleep(1);
+
+	__raw_writel((__raw_readl(S3C_UDC_OTG_GUSBCFG)
+		|(0x3<<8)), S3C_UDC_OTG_GUSBCFG);
+
+//	smb136_set_otg_mode(1);
+
+	printk("otg_host_phy_int : USBPHYCTL=0x%x,PHYPWR=0x%x,PHYCLK=0x%x,USBCFG=0x%x\n",
+		readl(S5P_USB_PHY_CONTROL),
+		readl(S3C_USBOTG_PHYPWR),
+		readl(S3C_USBOTG_PHYCLK),
+		readl(S3C_UDC_OTG_GUSBCFG)
+		);
+}
+EXPORT_SYMBOL(otg_host_phy_init);
+
+
+#endif
+
 #endif
 
 MACHINE_START(ARIES, "aries")
