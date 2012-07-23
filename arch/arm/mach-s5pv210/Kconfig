@@ -475,6 +475,13 @@ config POKE_REC_BOOT_MAGIC
 	  Poke REC_BOOT_MAGIC into REC_BOOT_ADDR on reboot(..., "recovery") to flag
 	  stage1 init to load the recovery image.
 
+config FORCE_FAST_CHARGE
+        bool "Force AC charge mode at will"
+        default y
+        help
+          A simple sysfs interface to force adapters that
+          are detected as USB to charge as AC.
+
 endif
 
 config SEC_HEADSET
