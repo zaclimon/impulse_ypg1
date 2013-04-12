@@ -22,7 +22,7 @@
 #include <plat/irqs.h>
 #include <mach/hardware.h>
 #include <mach/gpio.h>
-#include <mach/gpio-aries.h>
+#include <mach/gpio-ypg1.h>
 #include <linux/jiffies.h>
 #include "qt602240.h"
 #if TOUCH_CPU_FREQ
@@ -3707,7 +3707,7 @@ int qt602240_probe(struct i2c_client *client,
 	quantum_touch_probe();
 #endif
 
-	set_irq_type(IRQ_TOUCH_INT, IRQ_TYPE_LEVEL_LOW); // IRQ_TYPE_EDGE_FALLING);
+	irq_set_irq_type(IRQ_TOUCH_INT, IRQ_TYPE_LEVEL_LOW); // IRQ_TYPE_EDGE_FALLING);
 	s3c_gpio_cfgpin(GPIO_TOUCH_INT, S3C_GPIO_SFN(0xf));
 	s3c_gpio_setpull(GPIO_TOUCH_INT, S3C_GPIO_PULL_NONE);
 
