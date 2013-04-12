@@ -311,6 +311,12 @@ config SAMSUNG_EPIC
 	depends on MACH_ARIES
 	help
 	 Select Samsung Epic 4G
+
+config SAMSUNG_YPG1
+	bool "select YP-G1"
+	depends on MACH_ARIES
+	help
+	 Select Samsung Galaxy Player 4.0
 endchoice
 endif
 
