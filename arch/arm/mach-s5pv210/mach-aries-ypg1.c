@@ -39,8 +39,8 @@
 #include <mach/map.h>
 #include <mach/regs-clock.h>
 #include <mach/gpio.h>
-#include <mach/gpio-aries.h>
-#include <mach/gpio-settings.h>
+#include <mach/gpio-ypg1.h>
+#include <mach/gpio-ypg1-settings.h>
 #include <mach/adc.h>
 #include <mach/param.h>
 #include <mach/system.h>
@@ -68,15 +68,19 @@
 
 #ifdef CONFIG_ANDROID_PMEM
 #include <linux/android_pmem.h>
+#endif
+
 #include <plat/media.h>
 #include <mach/media.h>
-#endif
 
 #ifdef CONFIG_S5PV210_POWER_DOMAIN
 #include <mach/power-domain.h>
 #endif
+#include <mach/cpu-freq-v210.h>
 
+#ifdef CONFIG_VIDEO_ISX005
 #include <media/isx005_platform.h>
+#endif
 #include <media/s5ka3dfx_platform.h>
 
 #include <plat/regs-serial.h>
@@ -87,6 +91,7 @@
 #include <plat/mfc.h>
 #include <plat/iic.h>
 #include <plat/pm.h>
+#include <plat/s5p-time.h>
 
 #include <plat/sdhci.h>
 #include <plat/fimc.h>
@@ -106,6 +111,9 @@
 #endif
 
 #include "aries.h"
+
+#undef pr_debug
+#define pr_debug pr_info
 
 struct class *sec_class;
 EXPORT_SYMBOL(sec_class);
@@ -137,7 +145,7 @@ EXPORT_SYMBOL(sec_get_param_value);
 #define WLAN_SECTION_SIZE_2	(PREALLOC_WLAN_BUF_NUM * 512)
 #define WLAN_SECTION_SIZE_3	(PREALLOC_WLAN_BUF_NUM * 1024)
 
-#define WLAN_SKB_BUF_NUM	17
+#define WLAN_SKB_BUF_NUM	16
 
 static struct sk_buff *wlan_static_skb[WLAN_SKB_BUF_NUM];
 
@@ -311,7 +319,7 @@ static struct s3c2410_uartcfg aries_uartcfgs[] __initdata = {
 #define S5PV210_LCD_WIDTH 480
 #define S5PV210_LCD_HEIGHT 800
 
-static struct s3cfb_lcd nt35580 = {
+static struct s3cfb_lcd s6e63m0 = {
 	.width = S5PV210_LCD_WIDTH,
 	.height = S5PV210_LCD_HEIGHT,
 	.p_width = 52,
@@ -459,8 +467,39 @@ static struct s5p_media_device aries_media_devs[] = {
 	},*/		
 };
 
+#ifdef CONFIG_CPU_FREQ
+static struct s5pv210_cpufreq_voltage smdkc110_cpufreq_volt[] = {
+	{
+		.freq	= 1000000,
+		.varm	= 1275000,
+		.vint	= 1100000,
+	}, {
+		.freq	=  800000,
+		.varm	= 1200000,
+		.vint	= 1100000,
+	}, {
+		.freq	=  400000,
+		.varm	= 1050000,
+		.vint	= 1100000,
+	}, {
+		.freq	=  200000,
+		.varm	=  950000,
+		.vint	= 1100000,
+	}, {
+		.freq	=  100000,
+		.varm	=  950000,
+		.vint	= 1000000,
+	},
+};
+
+static struct s5pv210_cpufreq_data smdkc110_cpufreq_plat = {
+	.volt	= smdkc110_cpufreq_volt,
+	.size	= ARRAY_SIZE(smdkc110_cpufreq_volt),
+};
+#endif
+
 static struct regulator_consumer_supply ldo3_consumer[] = {
-	REGULATOR_SUPPLY("usb_io", NULL),
+	REGULATOR_SUPPLY("pd_io", "s3c-usbgadget")
 };
 
 static struct regulator_consumer_supply ldo5_consumer[] = {
@@ -472,11 +511,11 @@ static struct regulator_consumer_supply ldo6_consumer[] = {
 };
 
 static struct regulator_consumer_supply ldo7_consumer[] = {
-	REGULATOR_SUPPLY("vlcd", NULL),
+	{	.supply	= "vlcd", },
 };
 
 static struct regulator_consumer_supply ldo8_consumer[] = {
-	REGULATOR_SUPPLY("usb_core", NULL),
+	REGULATOR_SUPPLY("pd_core", "s3c-usbgadget"),
 	REGULATOR_SUPPLY("tvout", NULL),
 };
 
@@ -485,7 +524,7 @@ static struct regulator_consumer_supply ldo10_consumer[] = {
 };
 
 static struct regulator_consumer_supply ldo11_consumer[] = {
-	REGULATOR_SUPPLY("cam_af", NULL),
+	{	.supply	= "cam_af", },
 };
 
 static struct regulator_consumer_supply ldo12_consumer[] = {
@@ -497,7 +536,7 @@ static struct regulator_consumer_supply ldo13_consumer[] = {
 };
 
 static struct regulator_consumer_supply ldo14_consumer[] = {
-	REGULATOR_SUPPLY("vga_dvdd", NULL),
+	{	.supply	= "vga_dvdd", },
 };
 
 static struct regulator_consumer_supply ldo15_consumer[] = {
@@ -509,15 +548,15 @@ static struct regulator_consumer_supply ldo16_consumer[] = {
 };
 
 static struct regulator_consumer_supply ldo17_consumer[] = {
-	REGULATOR_SUPPLY("vcc_lcd", NULL),
+	{	.supply	= "vcc_lcd", },
 };
 
 static struct regulator_consumer_supply buck1_consumer[] = {
-	REGULATOR_SUPPLY("vddarm", NULL),
+	{	.supply	= "vddarm", },
 };
 
 static struct regulator_consumer_supply buck2_consumer[] = {
-	REGULATOR_SUPPLY("vddint", NULL),
+	{	.supply	= "vddint", },
 };
 
 static struct regulator_consumer_supply buck4_consumer[] = {
@@ -954,11 +993,18 @@ static struct max8998_platform_data max8998_pdata = {
 	.num_regulators		= ARRAY_SIZE(aries_regulators),
 	.regulators		= aries_regulators,
 	.charger		= &aries_charger,
-	.buck1_set1		= GPIO_BUCK_1_EN_A,
-	.buck1_set2		= GPIO_BUCK_1_EN_B,
-	.buck2_set3		= GPIO_BUCK_2_EN,
-	.buck1_voltage_set	= { 1275000, 1200000, 1050000, 950000 },
-	.buck2_voltage_set	= { 1100000, 1000000 },
+	/* Preloads must be in increasing order of voltage value */
+	.buck1_voltage4	= 950000,
+	.buck1_voltage3	= 1050000,
+	.buck1_voltage2	= 1200000,
+	.buck1_voltage1	= 1275000,
+	.buck2_voltage2	= 1000000,
+	.buck2_voltage1	= 1100000,
+	.buck1_set1	= GPIO_BUCK_1_EN_A,
+	.buck1_set2	= GPIO_BUCK_1_EN_B,
+	.buck2_set3	= GPIO_BUCK_2_EN,
+	.buck1_default_idx = 1,
+	.buck2_default_idx = 0,
 };
 
 struct platform_device regulator_consumer = {
@@ -1252,7 +1298,7 @@ static struct i2c_gpio_platform_data i2c4_platdata = {
 	.scl_is_output_only	= 0,
 };
 
-static struct platform_device s3c_device_i2c4 = {
+static struct platform_device aries_s3c_device_i2c4 = {
 	.name			= "i2c-gpio",
 	.id			= 4,
 	.dev.platform_data	= &i2c4_platdata,
@@ -1267,7 +1313,7 @@ static struct i2c_gpio_platform_data i2c5_platdata = {
 	.scl_is_output_only	= 0,
 };
 
-static struct platform_device s3c_device_i2c5 = {
+static struct platform_device aries_s3c_device_i2c5 = {
 	.name			= "i2c-gpio",
 	.id			= 5,
 	.dev.platform_data	= &i2c5_platdata,
@@ -1282,7 +1328,7 @@ static struct i2c_gpio_platform_data i2c6_platdata = {
 	.scl_is_output_only	= 0,
 };
 
-static struct platform_device s3c_device_i2c6 = {
+static struct platform_device aries_s3c_device_i2c6 = {
 	.name			= "i2c-gpio",
 	.id			= 6,
 	.dev.platform_data	= &i2c6_platdata,
@@ -1297,7 +1343,7 @@ static struct i2c_gpio_platform_data i2c7_platdata = {
 	.scl_is_output_only	= 0,
 };
 
-static struct platform_device s3c_device_i2c7 = {
+static struct platform_device aries_s3c_device_i2c7 = {
 	.name			= "i2c-gpio",
 	.id			= 7,
 	.dev.platform_data	= &i2c7_platdata,
@@ -1451,7 +1497,7 @@ static struct gpio_event_direct_entry aries_keypad_key_map[] = {
 static struct gpio_event_input_info aries_keypad_key_info = {
 	.info.func = gpio_event_input_func,
 	.info.no_suspend = true,
-	.debounce_time.tv.nsec = 5 * NSEC_PER_MSEC,
+	.debounce_time.tv64 = 5 * NSEC_PER_MSEC,
 	.type = EV_KEY,
 	.keymap = aries_keypad_key_map,
 	.keymap_size = ARRAY_SIZE(aries_keypad_key_map)
@@ -1517,16 +1563,9 @@ static void sec_jack_set_micbias_state(bool on)
 	spin_unlock_irqrestore(&mic_bias_lock, flags);
 }
 
-static void wm8994_set_ear_path(bool on)
-{
-        printk("wm8994_set_ear_path(%d)\n", on);
-	gpio_set_value(GPIO_MUTE_ON, on);
-}
-
 static struct wm8994_platform_data wm8994_pdata = {
 	.ldo = GPIO_CODEC_LDO_EN,
 	.set_mic_bias = wm8994_set_mic_bias,
-	.set_ear_path = wm8994_set_ear_path,
 };
 
 /*
@@ -2038,11 +2077,13 @@ static struct s3c_platform_camera s5ka3dfx = {
 static struct s3c_platform_fimc fimc_plat_lsi = {
 	.srclk_name	= "mout_mpll",
 	.clk_name	= "sclk_fimc",
-	.lclk_name	= "sclk_fimc_lclk",
+	.lclk_name	= "fimc",
 	.clk_rate	= 166750000,
 	.default_cam	= CAMERA_PAR_A,
 	.camera		= {
+#ifdef CONFIG_VIDEO_ISX005
 		&isx005,
+#endif
 		&s5ka3dfx,
 	},
 	.hw_ver		= 0x43,
@@ -2063,7 +2104,7 @@ static struct i2c_board_info i2c_devs0[] __initdata = {
 
 static struct i2c_board_info i2c_devs4[] __initdata = {
 	{
-		I2C_BOARD_INFO("wm8994", (0x34>>1)),
+		I2C_BOARD_INFO("wm8994-samsung", (0x34>>1)),
 		.platform_data = &wm8994_pdata,
 	},
 };
@@ -2270,18 +2311,12 @@ static void fsa9480_reset_cb(void)
 		pr_err("Failed to register dock switch. %d\n", ret);
 }
 
-static void fsa9480_set_init_flag(void)
-{
-	fsa9480_init_flag = 1;
-}
-
 static struct fsa9480_platform_data fsa9480_pdata = {
 	.usb_cb = fsa9480_usb_cb,
 	.charger_cb = fsa9480_charger_cb,
 	.deskdock_cb = fsa9480_deskdock_cb,
 	.cardock_cb = fsa9480_cardock_cb,
 	.reset_cb = fsa9480_reset_cb,
-	.set_init_flag = fsa9480_set_init_flag,
 };
 
 static struct i2c_board_info i2c_devs7[] __initdata = {
@@ -2463,52 +2498,6 @@ struct platform_device sec_device_battery = {
 	.id	= -1,
 };
 
-static int sec_switch_get_cable_status(void)
-{
-	return mtp_off_status ? CABLE_TYPE_NONE : set_cable_status;
-}
-
-static int sec_switch_get_phy_init_status(void)
-{
-	return fsa9480_init_flag;
-}
-
-static void sec_switch_set_vbus_status(u8 mode)
-{
-	if (mode == USB_VBUS_ALL_OFF)
-		mtp_off_status = true;
-
-	if (charger_callbacks && charger_callbacks->set_esafe)
-		charger_callbacks->set_esafe(charger_callbacks, mode);
-}
-
-static void sec_switch_set_usb_gadget_vbus(bool en)
-{
-	struct usb_gadget *gadget = platform_get_drvdata(&s3c_device_usbgadget);
-
-	if (gadget) {
-		if (en)
-			usb_gadget_vbus_connect(gadget);
-		else
-			usb_gadget_vbus_disconnect(gadget);
-	}
-}
-
-static struct sec_switch_platform_data sec_switch_pdata = {
-	.set_vbus_status = sec_switch_set_vbus_status,
-	.set_usb_gadget_vbus = sec_switch_set_usb_gadget_vbus,
-	.get_cable_status = sec_switch_get_cable_status,
-	.get_phy_init_status = sec_switch_get_phy_init_status,
-};
-
-struct platform_device sec_device_switch = {
-	.name	= "sec_switch",
-	.id	= 1,
-	.dev	= {
-		.platform_data	= &sec_switch_pdata,
-	}
-};
-
 static struct platform_device sec_device_rfkill = {
 	.name	= "bt_rfkill",
 	.id	= -1,
@@ -2617,32 +2606,17 @@ static struct platform_device sec_device_jack = {
 #define S5PV210_PS_HOLD_CONTROL_REG (S3C_VA_SYS+0xE81C)
 static void aries_power_off(void)
 {
-	int err;
-	int mode = REBOOT_MODE_NONE;
-	char reset_mode = 'r';
-	int phone_wait_cnt = 0;
-
-	/* Change this API call just before power-off to take the dump. */
-	/* kernel_sec_clear_upload_magic_number(); */
-
 	while (1) {
 		/* Check reboot charging */
-		if (charger_callbacks &&
-		    charger_callbacks->get_vdcin &&
-		    charger_callbacks->get_vdcin(charger_callbacks)) {
+		if (set_cable_status) {
 			/* watchdog reset */
 			pr_info("%s: charger connected, rebooting\n", __func__);
-			mode = REBOOT_MODE_CHARGING;
-			if (sec_set_param_value)
-				sec_set_param_value(__REBOOT_MODE, &mode);
-			kernel_sec_clear_upload_magic_number();
-			kernel_sec_hw_reset(1);
+			writel(3, S5P_INFORM6);
 			arch_reset('r', NULL);
 			pr_crit("%s: waiting for reset!\n", __func__);
 			while (1);
 		}
 
-		kernel_sec_clear_upload_magic_number();
 		/* wait for power button release */
 		if (gpio_get_value(GPIO_nPOWER)) {
 			pr_info("%s: set PS_HOLD low\n", __func__);
@@ -2741,7 +2715,7 @@ static void config_init_gpio(void)
 	config_gpio_table(ARRAY_SIZE(initial_gpio_table), initial_gpio_table);
 }
 
-void config_sleep_gpio(void)
+void s3c_config_sleep_gpio(void)
 {
 	config_gpio_table(ARRAY_SIZE(sleep_alive_gpio_table), sleep_alive_gpio_table);
 	config_sleep_gpio_table(ARRAY_SIZE(sleep_gpio_table), sleep_gpio_table);
@@ -2762,7 +2736,7 @@ void config_sleep_gpio(void)
 	printk(KERN_DEBUG "SLPGPIO : PS_ON(%d) FM_RST(%d) UART_SEL(%d)\n",
 		gpio_get_value(GPIO_PS_ON), gpio_get_value(GPIO_FM_RST), gpio_get_value(GPIO_UART_SEL));
 }
-EXPORT_SYMBOL(config_sleep_gpio);
+EXPORT_SYMBOL(s3c_config_sleep_gpio);
 
 static unsigned int wlan_sdio_on_table[][4] = {
 	{GPIO_WLAN_SDIO_CLK, GPIO_WLAN_SDIO_CLK_AF, GPIO_LEVEL_NONE,
@@ -2897,30 +2871,18 @@ static void *aries_mem_prealloc(int section, unsigned long size)
 	return wifi_mem_array[section].mem_ptr;
 }
 
-#define DHD_SKB_HDRSIZE 		336
-#define DHD_SKB_1PAGE_BUFSIZE	((PAGE_SIZE*1)-DHD_SKB_HDRSIZE)
-#define DHD_SKB_2PAGE_BUFSIZE	((PAGE_SIZE*2)-DHD_SKB_HDRSIZE)
-#define DHD_SKB_4PAGE_BUFSIZE	((PAGE_SIZE*4)-DHD_SKB_HDRSIZE)
 int __init aries_init_wifi_mem(void)
 {
 	int i;
 	int j;
 
-	for (i = 0; i < 8; i++) {
-		wlan_static_skb[i] = dev_alloc_skb(DHD_SKB_1PAGE_BUFSIZE);
+	for (i = 0 ; i < WLAN_SKB_BUF_NUM ; i++) {
+		wlan_static_skb[i] = dev_alloc_skb(
+				((i < (WLAN_SKB_BUF_NUM / 2)) ? 4096 : 8192));
+
 		if (!wlan_static_skb[i])
 			goto err_skb_alloc;
 	}
-	
-	for (; i < 16; i++) {
-		wlan_static_skb[i] = dev_alloc_skb(DHD_SKB_2PAGE_BUFSIZE);
-		if (!wlan_static_skb[i])
-			goto err_skb_alloc;
-	}
-	
-	wlan_static_skb[i] = dev_alloc_skb(DHD_SKB_4PAGE_BUFSIZE);
-	if (!wlan_static_skb[i])
-		goto err_skb_alloc;
 
 	for (i = 0 ; i < PREALLOC_WLAN_SEC_NUM ; i++) {
 		wifi_mem_array[i].mem_ptr =
@@ -2945,11 +2907,81 @@ int __init aries_init_wifi_mem(void)
 
 	return -ENOMEM;
 }
+
+/* Customized Locale table : OPTIONAL feature */
+#define WLC_CNTRY_BUF_SZ	4
+typedef struct cntry_locales_custom {
+	char iso_abbrev[WLC_CNTRY_BUF_SZ];
+	char custom_locale[WLC_CNTRY_BUF_SZ];
+	int  custom_locale_rev;
+} cntry_locales_custom_t;
+
+static cntry_locales_custom_t aries_wifi_translate_custom_table[] = {
+/* Table should be filled out based on custom platform regulatory requirement */
+	{"",   "XY", 4},  /* universal */
+	{"US", "US", 69}, /* input ISO "US" to : US regrev 69 */
+	{"CA", "US", 69}, /* input ISO "CA" to : US regrev 69 */
+	{"EU", "EU", 5},  /* European union countries */
+	{"AT", "EU", 5},
+	{"BE", "EU", 5},
+	{"BG", "EU", 5},
+	{"CY", "EU", 5},
+	{"CZ", "EU", 5},
+	{"DK", "EU", 5},
+	{"EE", "EU", 5},
+	{"FI", "EU", 5},
+	{"FR", "EU", 5},
+	{"DE", "EU", 5},
+	{"GR", "EU", 5},
+	{"HU", "EU", 5},
+	{"IE", "EU", 5},
+	{"IT", "EU", 5},
+	{"LV", "EU", 5},
+	{"LI", "EU", 5},
+	{"LT", "EU", 5},
+	{"LU", "EU", 5},
+	{"MT", "EU", 5},
+	{"NL", "EU", 5},
+	{"PL", "EU", 5},
+	{"PT", "EU", 5},
+	{"RO", "EU", 5},
+	{"SK", "EU", 5},
+	{"SI", "EU", 5},
+	{"ES", "EU", 5},
+	{"SE", "EU", 5},
+	{"GB", "EU", 5},  /* input ISO "GB" to : EU regrev 05 */
+	{"IL", "IL", 0},
+	{"CH", "CH", 0},
+	{"TR", "TR", 0},
+	{"NO", "NO", 0},
+	{"KR", "XY", 3},
+	{"AU", "XY", 3},
+	{"CN", "XY", 3},  /* input ISO "CN" to : XY regrev 03 */
+	{"TW", "XY", 3},
+	{"AR", "XY", 3},
+	{"MX", "XY", 3}
+};
+
+static void *aries_wifi_get_country_code(char *ccode)
+{
+	int size = ARRAY_SIZE(aries_wifi_translate_custom_table);
+	int i;
+
+	if (!ccode)
+		return NULL;
+
+	for (i = 0; i < size; i++)
+		if (strcmp(ccode, aries_wifi_translate_custom_table[i].iso_abbrev) == 0)
+			return &aries_wifi_translate_custom_table[i];
+	return &aries_wifi_translate_custom_table[0];
+}
+
 static struct wifi_platform_data wifi_pdata = {
 	.set_power		= wlan_power_en,
 	.set_reset		= wlan_reset_en,
 	.set_carddetect		= wlan_carddetect_en,
 	.mem_prealloc		= aries_mem_prealloc,
+	.get_country_code	= aries_wifi_get_country_code,
 };
 
 static struct platform_device sec_device_wifi = {
@@ -2972,7 +3004,7 @@ static struct platform_device *aries_devices[] __initdata = {
 #ifdef CONFIG_FIQ_DEBUGGER
 	&s5pv210_device_fiqdbg_uart2,
 #endif
-	&s5pc110_device_onenand,
+	&s5p_device_onenand,
 #ifdef CONFIG_RTC_DRV_S3C
 	&s5p_device_rtc,
 #endif
@@ -3018,11 +3050,11 @@ static struct platform_device *aries_devices[] __initdata = {
 #if defined(CONFIG_S3C_DEV_I2C2)
 	&s3c_device_i2c2,
 #endif
-	&s3c_device_i2c4,
-	&s3c_device_i2c5,  /* accel sensor */
+	&aries_s3c_device_i2c4,
+	&aries_s3c_device_i2c5,  /* accel sensor */
 	&regulator_consumer,
-	&s3c_device_i2c6,
-	&s3c_device_i2c7,
+	&aries_s3c_device_i2c6,
+	&aries_s3c_device_i2c7,
 #if !defined(CONFIG_ARIES_NTT)
 	&s3c_device_i2c8,  /* FM radio */
 #endif
@@ -3064,8 +3096,6 @@ static struct platform_device *aries_devices[] __initdata = {
 	&sec_device_battery,
 	&s3c_device_i2c10,
 
-	&sec_device_switch,  // samsung switch driver
-
 #ifdef CONFIG_S5PV210_POWER_DOMAIN
 	&s5pv210_pd_audio,
 	&s5pv210_pd_cam,
@@ -3088,6 +3118,10 @@ static struct platform_device *aries_devices[] __initdata = {
 	&s3c_device_timer[3],
 #endif
 
+#ifdef CONFIG_CPU_FREQ
+	&s5pv210_device_cpufreq,
+#endif
+
 // VenturiGB_Usys_jypark 2011.08.16 - DMB [[
 #ifdef CONFIG_S3C64XX_DEV_SPI
  &s5pv210_device_spi0,
@@ -3103,6 +3137,7 @@ static struct platform_device *aries_devices[] __initdata = {
 	&s5p_device_rp,
 #endif
 	&sec_device_wifi,
+	&samsung_asoc_dma,
 };
 
 
@@ -3112,9 +3147,13 @@ static void __init aries_map_io(void)
 	s3c24xx_init_clocks(24000000);
 	s5pv210_gpiolib_init();
 	s3c24xx_init_uarts(aries_uartcfgs, ARRAY_SIZE(aries_uartcfgs));
-	s5p_reserve_bootmem(aries_media_devs, ARRAY_SIZE(aries_media_devs));
+	#ifndef CONFIG_S5P_HIGH_RES_TIMERS
+		s5p_set_timer_source(S5P_PWM3, S5P_PWM4);
+	#endif
+	s5p_reserve_bootmem(aries_media_devs,
+		ARRAY_SIZE(aries_media_devs), S5P_RANGE_MFC);
 #ifdef CONFIG_MTD_ONENAND
-	s5pc110_device_onenand.name = "s5pc110-onenand";
+	s5p_device_onenand.name = "s5pc110-onenand";
 #endif
 }
 
@@ -3129,16 +3168,13 @@ static void __init aries_fixup(struct machine_desc *desc,
 {
 	mi->bank[0].start = 0x30000000;
 	mi->bank[0].size = 80 * SZ_1M;
-	mi->bank[0].node = 0;
 
 	mi->bank[1].start = 0x40000000;
 	mi->bank[1].size = 256 * SZ_1M;
-	mi->bank[1].node = 1;
 
 	mi->bank[2].start = 0x50000000;
 	/* 1M for ram_console buffer */
 	mi->bank[2].size = 127 * SZ_1M;
-	mi->bank[2].node = 2;
 	mi->nr_banks = 3;
 
 	ram_console_start = mi->bank[2].start + mi->bank[2].size;
@@ -3232,7 +3268,6 @@ static void __init onenand_init()
 static void __init aries_machine_init(void)
 {
 	setup_ram_console_mem();
-	s3c_usb_set_serial();
 	platform_add_devices(aries_devices, ARRAY_SIZE(aries_devices));
 
 	/* Find out S5PC110 chip version */
@@ -3401,6 +3436,10 @@ static void __init aries_machine_init(void)
 	s3c_sdhci_set_platdata();
 #endif
 
+#ifdef CONFIG_CPU_FREQ
+	s5pv210_cpufreq_set_platdata(&smdkc110_cpufreq_plat);
+#endif
+
 	regulator_has_full_constraints();
 
 	register_reboot_notifier(&aries_reboot_notifier);
@@ -3502,10 +3541,7 @@ void usb_host_phy_off(void)
 EXPORT_SYMBOL(usb_host_phy_off);
 #endif
 
-MACHINE_START(SMDKC110, "SMDKC110")
-	/* Maintainer: Kukjin Kim <kgene.kim@samsung.com> */
-	.phys_io	= S3C_PA_UART & 0xfff00000,
-	.io_pg_offst	= (((u32)S3C_VA_UART) >> 18) & 0xfffc,
+MACHINE_START(ARIES, "aries")
 	.boot_params	= S5P_PA_SDRAM + 0x100,
 	.fixup		= aries_fixup,
 	.init_irq	= s5pv210_init_irq,
@@ -3516,17 +3552,6 @@ MACHINE_START(SMDKC110, "SMDKC110")
 #else
 	.timer		= &s3c24xx_timer,
 #endif
-MACHINE_END
-
-MACHINE_START(ARIES, "SMDKC110")
-	.phys_io	= S3C_PA_UART & 0xfff00000,
-	.io_pg_offst	= (((u32)S3C_VA_UART) >> 18) & 0xfffc,
-	.boot_params	= S5P_PA_SDRAM + 0x100,
-	.fixup		= aries_fixup,
-	.init_irq	= s5pv210_init_irq,
-	.map_io		= aries_map_io,
-	.init_machine	= aries_machine_init,
-	.timer		= &s5p_systimer,
 MACHINE_END
 
 void s3c_setup_uart_cfg_gpio(unsigned char port)
