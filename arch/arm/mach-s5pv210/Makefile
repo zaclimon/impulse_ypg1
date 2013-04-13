@@ -38,7 +38,7 @@ obj-$(CONFIG_MACH_HERRING)	+= dev-herring-phone.o
 
 ifeq ($(CONFIG_SAMSUNG_YPG1),y)
 obj-$(CONFIG_MACH_ARIES)	+= mach-aries-ypg1.o aries-rfkill.o
-obj-$(CONFIG_MACH_ARIES)	+= aries-panel-ypg1.o
+obj-$(CONFIG_MACH_ARIES)	+= aries-panel.o
 else
 obj-$(CONFIG_MACH_ARIES)	+= mach-aries.o aries-rfkill.o
 obj-$(CONFIG_MACH_ARIES)	+= aries-panel.o
