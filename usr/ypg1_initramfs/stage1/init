@@ -58,7 +58,7 @@ load_len=$boot_len
 
 # The buyer code is needed for the touch screen driver, so go ahead and
 # copy all of the efs data now.
-busybox mount -t yaffs2 /dev/block/mtdblock4 /efs
+busybox mount -t yaffs2 /dev/block/mtdblock5 /efs
 if busybox test -e /efs/buyer_code.dat ; then
 	cat /efs/buyer_code.dat > /sys/firmware/efs/buyer_code
 fi
@@ -73,11 +73,20 @@ busybox mount -t yaffs2 /dev/block/mtdblock2 /system
 REC_BOOT_ADDR="0x57fff800"
 REC_BOOT_MAGIC="0x5EC0B007" # Must be in caps.
 
-if ! busybox test -e /system/build.prop ; then
+if busybox grep -q bootmode=2 /proc/cmdline ; then
+        # recovery boot
+        busybox devmem "$REC_BOOT_ADDR" 32 0x0
+        load_offset=$recovery_offset
+        load_len=$recovery_len
+
+        # disable lpm
+        busybox echo 0 > /sys/class/power_supply/battery/charging_mode_booting
+
+elif ! busybox test -e /system/build.prop ; then
 	# emergency boot
         erase_image cache
 	busybox mkdir -p /cache
-        busybox mount -t yaffs2 /dev/block/mtdblock3 /cache
+        busybox mount -t yaffs2 /dev/block/mtdblock4 /cache
         busybox mkdir /cache/recovery
 
 	busybox mkdir -p /sdcard
@@ -96,8 +105,7 @@ if ! busybox test -e /system/build.prop ; then
 	# disable lpm
 	busybox echo 0 > /sys/class/power_supply/battery/charging_mode_booting
 
-elif busybox test `busybox devmem "$REC_BOOT_ADDR" 32` = "$REC_BOOT_MAGIC" ; || \
-	busybox grep -q bootmode=2 /proc/cmdline ; then
+elif busybox test `busybox devmem "$REC_BOOT_ADDR" 32` = "$REC_BOOT_MAGIC" ; then
 	# recovery boot
 	busybox devmem "$REC_BOOT_ADDR" 32 0x0
 	load_offset=$recovery_offset
