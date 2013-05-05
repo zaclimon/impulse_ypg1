@@ -15,13 +15,26 @@
 #define ENDDEF			0x2000
 #define DEFMASK		0xFF00
 
+typedef enum
+{
+    LCD_SONY,
+    LCD_HYDIS,
+    LCD_HITACHI,
+}LCD_Vendor;
+
 struct s5p_tft_panel_data {
 	const u16 *seq_set;
 	const u16 *sleep_in;
 	const u16 *display_on;
 	const u16 *display_off;
+   int        cur_vendor;
 	u16 *brightness_set;
 	int pwm_reg_offset;
+	const u16* seq_cabc_ui;
+	const u16* seq_cabc_video;
+	const u16* seq_cabc_image;
+	const u16* seq_cabc_off;
+	void (*backlight_on)(int enable);
 };
 
 

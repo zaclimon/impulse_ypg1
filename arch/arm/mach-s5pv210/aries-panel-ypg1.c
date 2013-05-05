@@ -18,8 +18,8 @@
 #include <linux/tl2796.h>
 #include <linux/nt35580.h>
 #include <mach/gpio.h>
-#include <mach/gpio-aries.h>
-#include <mach/gpio-settings.h>
+#include <mach/gpio-ypg1.h>
+#include <mach/gpio-ypg1-settings.h>
 
 #define SLEEPMSEC		0x1000
 #define ENDDEF			0x2000

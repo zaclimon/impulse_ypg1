@@ -319,7 +319,7 @@ static struct s3c2410_uartcfg aries_uartcfgs[] __initdata = {
 #define S5PV210_LCD_WIDTH 480
 #define S5PV210_LCD_HEIGHT 800
 
-static struct s3cfb_lcd s6e63m0 = {
+static struct s3cfb_lcd nt35580 = {
 	.width = S5PV210_LCD_WIDTH,
 	.height = S5PV210_LCD_HEIGHT,
 	.p_width = 52,
