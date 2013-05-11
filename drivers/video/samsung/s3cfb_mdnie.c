@@ -38,7 +38,10 @@
 #include "s3cfb.h"
 #include "s3cfb_mdnie.h"
 #include "s3cfb_ielcd.h"
-
+#ifdef CONFIG_FB_S3C_NT35580
+#include <linux/nt35580.h>
+struct s5p_lcd *g_lcd;
+#endif
 
 
 static struct resource *s3c_mdnie_mem;
@@ -80,17 +83,6 @@ typedef struct {
 	u16 addr;
 	u16 data;
 } mDNIe_data_type;
-
-typedef enum
-{
-	mDNIe_UI_MODE,
-	mDNIe_VIDEO_MODE,
-	mDNIe_VIDEO_WARM_MODE,
-	mDNIe_VIDEO_COLD_MODE,
-	mDNIe_CAMERA_MODE,
-	mDNIe_NAVI,
-	mDNIe_BYPASS_MODE
-}Lcd_mDNIe_UI;
 
 struct class *mdnieset_ui_class;
 struct device *switch_mdnieset_ui_dev;
