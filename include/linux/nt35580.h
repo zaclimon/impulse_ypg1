@@ -10,6 +10,10 @@
  * published by the Free Software Foundation.
 */
 #include <linux/types.h>
+#include <linux/spi/spi.h>
+#include <linux/lcd.h>
+#include <linux/backlight.h>
+#include <linux/earlysuspend.h>
 
 #define SLEEPMSEC		0x1000
 #define ENDDEF			0x2000
@@ -37,4 +41,28 @@ struct s5p_tft_panel_data {
 	void (*backlight_on)(int enable);
 };
 
+typedef enum
+{
+	CABC_OFF,
+	CABC_UI,
+	CABC_IMAGE,
+	CABC_VIDEO,
+}LCD_CABC;
 
+
+struct s5p_lcd {
+	int ldi_enable;
+	int acl_enable;
+	int bl;
+	int current_gamma;
+	LCD_CABC cur_cabc;
+	struct mutex lock;
+	struct device *dev;
+	struct spi_device *g_spi;
+	struct s5p_tft_panel_data *data;
+	struct backlight_device *bl_dev;
+	struct lcd_device *lcd_dev;
+	struct class *acl_class;
+	struct device *switch_aclset_dev;
+	struct early_suspend early_suspend;
+};
