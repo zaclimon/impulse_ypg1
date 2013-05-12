@@ -503,7 +503,7 @@ static struct regulator_consumer_supply ldo3_consumer[] = {
 };
 
 static struct regulator_consumer_supply ldo5_consumer[] = {
-	REGULATOR_SUPPLY("vtf", NULL),
+	REGULATOR_SUPPLY("vmmc", NULL),
 };
 
 static struct regulator_consumer_supply ldo6_consumer[] = {
