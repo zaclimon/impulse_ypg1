@@ -43,7 +43,8 @@
 #ifdef CONFIG_MACH_ARIES
 static int vtmode = 0;
 static int device_id = 0;
-#else // CONFIG_MACH_P1
+#endif
+#ifdef CONFIG_VIDEO_ISX005
 int camera_back_check = 0;
 int camera_active_type = 0;
 #endif
