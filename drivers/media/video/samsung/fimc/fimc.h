@@ -385,7 +385,7 @@ struct fimc_control {
 	wait_queue_head_t		wq;
 	struct device			*dev;
 	int				irq;
-#ifdef CONFIG_MACH_P1
+#ifdef CONFIG_VIDEO_ISX005
 	int	vt_mode;
 #endif
 	/* v4l2 related */
