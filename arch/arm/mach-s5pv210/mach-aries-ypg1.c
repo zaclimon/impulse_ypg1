@@ -2261,6 +2261,13 @@ static struct i2c_board_info i2c_devs8[] __initdata = {
 static int fsa9480_init_flag = 0;
 static bool mtp_off_status;
 
+static void fsa9480_charger_cb(bool attached)
+{
+	set_cable_status = attached ? CABLE_TYPE_AC : CABLE_TYPE_NONE;
+	if (charger_callbacks && charger_callbacks->set_cable)
+                charger_callbacks->set_cable(charger_callbacks, set_cable_status);
+}
+
 static void fsa9480_usb_cb(bool attached)
 {
 #ifdef CONFIG_FORCE_FAST_CHARGE
@@ -2283,13 +2290,6 @@ static void fsa9480_usb_cb(bool attached)
 #ifdef CONFIG_FORCE_FAST_CHARGE
 	}
 #endif
-}
-
-static void fsa9480_charger_cb(bool attached)
-{
-	set_cable_status = attached ? CABLE_TYPE_AC : CABLE_TYPE_NONE;
-	if (charger_callbacks && charger_callbacks->set_cable)
-                charger_callbacks->set_cable(charger_callbacks, set_cable_status);
 }
 
 static struct switch_dev switch_dock = {
