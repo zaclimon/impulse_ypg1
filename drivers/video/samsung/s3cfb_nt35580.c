@@ -38,10 +38,10 @@ extern void init_mdnie_class(struct s5p_lcd *lcd);
 #define NT35580_POWERON_DELAY	150
 
 #define MAX_BRIGHTNESS_LEVEL 255
-#define LOW_BRIGHTNESS_LEVEL 21//30
+#define LOW_BRIGHTNESS_LEVEL 11//30
 #define MAX_BACKLIGHT_VALUE 213//240	
-#define LOW_BACKLIGHT_VALUE_SONY 21//7//35
-#define DIM_BACKLIGHT_VALUE_SONY 3//15	hw requeset cause by backlight ic issue on lowest level
+#define LOW_BACKLIGHT_VALUE_SONY 11//7//35
+#define DIM_BACKLIGHT_VALUE_SONY 1//15	hw requeset cause by backlight ic issue on lowest level
 /*For hitachi lcd*/
 #define MAX_BACKLIGHT_VALUE_HITACHI 181//216
 #define DEF_BACKLIGHT_VALUE_HITACHI  76//91
