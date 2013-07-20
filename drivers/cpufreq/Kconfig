@@ -116,19 +116,18 @@ config CPU_FREQ_DEFAULT_GOV_INTELLIDEMAND
 	help
 	  Intelligent OnDemand Govneror based on Samsung Patched OnDemand
 
-config CPU_FREQ_DEFAULT_GOV_WHEATLEY
-	bool "wheatley"
-	select CPU_FREQ_GOV_WHEATLEY
-	select CPU_FREQ_GOV_PERFORMANCE
-	help
-          Use the CPUFreq governor 'wheatley' as default.
-
 config CPU_FREQ_DEFAULT_GOV_LULZACTIVE
 	bool "lulzactive"
 	select CPU_FREQ_GOV_LULZACTIVE
 	select CPU_FREQ_GOV_PERFORMANCE
 	help
 	  Use the CPUFreq governor 'lulzactive' as default.
+
+config CPU_FREQ_DEFAULT_GOV_SMARTASS2  
+        bool "smartass2"  
+        select CPU_FREQ_GOV_SMARTASS2  
+        help  
+            Use the CPUFreq governor 'smartassV2' as default.
 
 endchoice
 
@@ -233,16 +232,19 @@ config CPU_FREQ_GOV_INTELLIDEMAND
 	help
 	  'intellidemand' - an intelligent ondemand governor
 
-config CPU_FREQ_GOV_WHEATLEY
-	tristate "'wheatley' cpufreq governor"
-	depends on CPU_FREQ
-
 config CPU_FREQ_GOV_LULZACTIVE
 	tristate "'lulzactive' cpufreq governor"
 	depends on CPU_FREQ
 	help
 	  'lulzactive' - a new interactive governor by Tegrak!
 	  If in doubt, say N.
+
+config CPU_FREQ_GOV_SMARTASS2
+        tristate "'smartassV2' cpufreq governor"
+        depends on CPU_FREQ
+        help
+            'smartassV2' - a "smart" governor
+            If in doubt, say N.
 
 menu "x86 CPU frequency scaling drivers"
 depends on X86
