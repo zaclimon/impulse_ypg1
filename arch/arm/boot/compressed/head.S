@@ -973,6 +973,10 @@ cache_clean_flush:
 		mov	r3, #16
 		b	call_cache_fn
 
+<<<<<<< HEAD
+=======
+       .arch armv4
+>>>>>>> b6d520b... Fix Linaro toolchain warnings
 __armv4_mpu_cache_flush:
 		mov	r2, #1
 		mov	r3, #0
@@ -991,6 +995,7 @@ __armv4_mpu_cache_flush:
 		mov	pc, lr
 		
 __fa526_cache_flush:
+		.arch armv6
 		mov	r1, #0
 		mcr	p15, 0, r1, c7, c14, 0	@ clean and invalidate D cache
 		mcr	p15, 0, r1, c7, c5, 0	@ flush I cache
@@ -1005,6 +1010,10 @@ __armv6_mmu_cache_flush:
 		mcr	p15, 0, r1, c7, c10, 4	@ drain WB
 		mov	pc, lr
 
+<<<<<<< HEAD
+=======
+       .arch armv7-a
+>>>>>>> b6d520b... Fix Linaro toolchain warnings
 __armv7_mmu_cache_flush:
 		mrc	p15, 0, r10, c0, c1, 5	@ read ID_MMFR1
 		tst	r10, #0xf << 16		@ hierarchical cache (ARMv7)
@@ -1072,6 +1081,10 @@ __armv5tej_mmu_cache_flush:
 		mcr	p15, 0, r0, c7, c10, 4	@ drain WB
 		mov	pc, lr
 
+<<<<<<< HEAD
+=======
+       .arch armv4
+>>>>>>> b6d520b... Fix Linaro toolchain warnings
 __armv4_mmu_cache_flush:
 		mov	r2, #64*1024		@ default: 32K dcache size (*2)
 		mov	r11, #32		@ default: 32 byte line size
