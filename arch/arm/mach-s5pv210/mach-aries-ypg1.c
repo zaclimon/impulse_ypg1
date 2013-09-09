@@ -371,10 +371,10 @@ static struct s3cfb_lcd r61408 = {
 	},
 };
 
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0 (8192 * SZ_1K)
+#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC0 (12288 * SZ_1K)
 // Disabled to save memory (we can't find where it's used)
 //#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC1 (9900 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2 (8192 * SZ_1K)
+#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMC2 (12288 * SZ_1K)
 #define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC0 (14336 * SZ_1K)
 #define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_MFC1 (21504 * SZ_1K)
 #define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD (S5PV210_LCD_WIDTH * \
@@ -382,11 +382,12 @@ static struct s3cfb_lcd r61408 = {
 					     (CONFIG_FB_S3C_NR_BUFFERS + \
 						 (CONFIG_FB_S3C_NUM_OVLY_WIN * \
 						  CONFIG_FB_S3C_NUM_BUF_OVLY_WIN)))
+// Was 8M, but we're only using it to encode VGA jpegs
 #define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_JPEG (4096 * SZ_1K)
-/*#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM (5550 * SZ_1K)
+#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM (5550 * SZ_1K)
 #define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1 (3000 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_ADSP (1500 * SZ_1K)
-#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM (3000 * SZ_1K) */
+#define  S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP (1500 * SZ_1K)
+#define  S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM (3000 * SZ_1K)
 
 
 static struct s5p_media_device aries_media_devs[] = {
@@ -439,7 +440,8 @@ static struct s5p_media_device aries_media_devs[] = {
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_FIMD,
 		.paddr = 0,
 	},
-/*	[7] = {
+#ifdef CONFIG_ANDROID_PMEM
+	[7] = {
 		.id = S5P_MDEV_PMEM,
 		.name = "pmem",
 		.bank = 0,
@@ -452,21 +454,22 @@ static struct s5p_media_device aries_media_devs[] = {
 		.bank = 0,
 		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_GPU1,
 		.paddr = 0,
-	},	
+	},
 	[9] = {
 		.id = S5P_MDEV_PMEM_ADSP,
 		.name = "pmem_adsp",
 		.bank = 0,
-		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_ADSP,
+		.memsize = S5PV210_ANDROID_PMEM_MEMSIZE_PMEM_ADSP,
 		.paddr = 0,
-	},		
+		},
 	[10] = {
 		.id = S5P_MDEV_TEXSTREAM,
 		.name = "s3c_bc",
 		.bank = 1,
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_TEXTSTREAM,
 		.paddr = 0,
-	},*/		
+	},	
+#endif
 };
 
 #ifdef CONFIG_CPU_FREQ
