@@ -34,6 +34,7 @@ nod /dev/mtd/mtd2 644 0 0 c 90 4
 nod /dev/mtd/mtd4ro 644 0 0 c 90 9
 nod /dev/mtd/mtd2ro 644 0 0 c 90 5
 nod /dev/mem 644 0 0 c 1 1
+nod /dev/urandom 644 0 0 c 1 9
 slink /init /stage1/init 777 0 0
 dir /proc 755 0 0
 dir /stage1 755 0 0
@@ -41,6 +42,11 @@ dir /system 755 0 0
 dir /cache 755 0 0
 dir /sdcard 755 0 0
 dir /efs 755 0 0
+dir /lvm 755 0 0
+dir /lvm/etc 755 0 0
+dir /lvm/sbin 755 0 0
+file /lvm/etc/lvm.conf source/usr/ypg1_initramfs_files/lvm.conf 755 0 0
+file /lvm/sbin/lvm source/usr/ypg1_initramfs_files/lvm 755 0 0
 file /stage1/busybox ../../utilities/busybox 755 0 0
 file /stage1/bml_over_mtd ../../utilities/bml_over_mtd 755 0 0
 file /stage1/kexec source/usr/ypg1_initramfs_files/kexec 755 0 0

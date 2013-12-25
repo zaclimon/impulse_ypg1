@@ -22,7 +22,11 @@ fi
 busybox umount /efs
 busybox rm -rf /efs
 
-busybox mount -t yaffs2 /dev/block/mtdblock2 /system
+/lvm/sbin/lvm vgscan --mknodes --ignorelockingfailure
+/lvm/sbin/lvm vgchange -aly --ignorelockingfailure
+
+busybox mount -t ext4 /dev/lvpool/system /system
+busybox mount -t yaffs2 /dev/block/mtdblock3 /cache
 
 image=/stage1/ramdisk.img
 
