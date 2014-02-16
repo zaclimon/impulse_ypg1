@@ -1923,7 +1923,8 @@ int fimc_streamon_capture(void *fh)
 			ctrl->cap->rotate = 90;
 			dev_err(ctrl->dev, "%s, rotate 90", __func__);
 		}
-#else // CONFIG_VIDEO_ISX005
+#endif
+#ifdef CONFIG_MACH_P1
 		if ((fimc->active_camera == CAMERA_ID_FRONT) && (ctrl->vt_mode == 0)) {
 			ctrl->cap->rotate = 270;
 			dev_err(ctrl->dev, "%s, rotate 270", __func__);
